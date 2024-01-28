@@ -78,6 +78,7 @@ function App() {
           onChange={(e) => setSelectedCountry(e.target.value)}
           className="dropdown"
           disabled={loading}
+          data-testid="country-dropdown"
         >
           <option value="" disabled>
             {loading ? "Loading Countries..." : "Select Country"}
@@ -93,6 +94,7 @@ function App() {
           onChange={(e) => setSelectedState(e.target.value)}
           className="dropdown"
           disabled={!selectedCountry || loading}
+          data-testid="state-dropdown"
         >
           <option value="" disabled>
             {loading ? "Loading States..." : "Select State"}
@@ -108,6 +110,7 @@ function App() {
           onChange={(e) => setSelectedCity(e.target.value)}
           className="dropdown"
           disabled={!selectedCountry || !selectedState || loading}
+          data-testid="city-dropdown"
         >
           <option value="" disabled>
             {loading ? "Loading Cities..." : "Select City"}
