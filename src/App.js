@@ -24,6 +24,7 @@ function App() {
         setLoading(false);
       }
     };
+
     fetchCountries();
   }, []);
 
@@ -44,6 +45,7 @@ function App() {
         }
       }
     };
+
     fetchStates();
   }, [selectedCountry]);
 
@@ -62,6 +64,7 @@ function App() {
         }
       }
     };
+
     fetchCities();
   }, [selectedCountry, selectedState]);
 
