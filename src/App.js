@@ -1,87 +1,73 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import "./App.css";
+import axios from "axios";
 
-function App() {
+export default function App() {
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
+  // Fetch countries on component mount
   useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get("https://crio-location-selector.onrender.com/countries");
-        setCountries(response.data);
-      } catch (error) {
-        setError("Error fetching countries");
-      } finally {
-        setLoading(false);
-      }
-    };
+    axios
+      .get("https://crio-location-selector.onrender.com/countries")
+      .then((res) => {
+        setCountries(res.data);
+        // Update the selected country if needed
+        if (!selectedCountry && res.data.length > 0) {
+          setSelectedCountry(res.data[0]);
+        }
+      })
+      .catch((err) => console.error("Error fetching countries:", err));
+  }, [selectedCountry]);
 
-    fetchCountries();
-  }, []);
-
+  // Fetch states when the selected country changes
   useEffect(() => {
-    const fetchStates = async () => {
-      if (selectedCountry) {
-        try {
-          setLoading(true);
-          const response = await axios.get(`https://crio-location-selector.onrender.com/country=${selectedCountry}/states`);
-          setStates(response.data);
+    if (selectedCountry) {
+      axios
+        .get(
+          `https://crio-location-selector.onrender.com/country=${selectedCountry}/states`
+        )
+        .then((res) => {
+          setStates(res.data);
+          // Reset the state and city based on country value
           setSelectedState("");
           setCities([]);
           setSelectedCity("");
-        } catch (error) {
-          setError("Error fetching states");
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchStates();
+        })
+        .catch((err) => console.error("Error fetching states:", err));
+    }
   }, [selectedCountry]);
 
+  // Fetch cities when the selected country and state change
   useEffect(() => {
-    const fetchCities = async () => {
-      if (selectedCountry && selectedState) {
-        try {
-          setLoading(true);
-          const response = await axios.get(`https://crio-location-selector.onrender.com/country=${selectedCountry}/state=${selectedState}/cities`);
-          setCities(response.data);
+    if (selectedCountry && selectedState) {
+      axios
+        .get(
+          `https://crio-location-selector.onrender.com/country=${selectedCountry}/state=${selectedState}/cities`
+        )
+        .then((res) => {
+          setCities(res.data);
           setSelectedCity("");
-        } catch (error) {
-          setError("Error fetching cities");
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchCities();
+        })
+        .catch((err) => console.error("Error fetching cities:", err));
+    }
   }, [selectedCountry, selectedState]);
 
   return (
-    <div className="city-selector">
+    <div className="city-selector" role="presentation">
       <h1>Select Location</h1>
-      {error && <div className="error">{error}</div>}
       <div className="dropdowns">
         <select
           value={selectedCountry}
           onChange={(e) => setSelectedCountry(e.target.value)}
           className="dropdown"
-          disabled={loading}
-          data-testid="country-dropdown"
         >
           <option value="" disabled>
-            {loading ? "Loading Countries..." : "Select Country"}
+            Select Country
           </option>
           {countries.map((country) => (
             <option key={country} value={country}>
@@ -93,11 +79,10 @@ function App() {
           value={selectedState}
           onChange={(e) => setSelectedState(e.target.value)}
           className="dropdown"
-          disabled={!selectedCountry || loading}
-          data-testid="state-dropdown"
+          disabled={!selectedCountry}
         >
           <option value="" disabled>
-            {loading ? "Loading States..." : "Select State"}
+            Select State
           </option>
           {states.map((state) => (
             <option key={state} value={state}>
@@ -109,11 +94,10 @@ function App() {
           value={selectedCity}
           onChange={(e) => setSelectedCity(e.target.value)}
           className="dropdown"
-          disabled={!selectedCountry || !selectedState || loading}
-          data-testid="city-dropdown"
+          disabled={!selectedCountry && !selectedState}
         >
           <option value="" disabled>
-            {loading ? "Loading Cities..." : "Select City"}
+            Select City
           </option>
           {cities.map((city) => (
             <option key={city} value={city}>
@@ -124,8 +108,7 @@ function App() {
       </div>
       {selectedCity && (
         <h2 className="result">
-          You selected{" "}
-          <span className="highlight">{selectedCity}</span>
+          You selected <span className="highlight">{selectedCity}</span>
           <span className="fade">
             {" "}
             {selectedState}, {selectedCountry}
@@ -135,5 +118,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
